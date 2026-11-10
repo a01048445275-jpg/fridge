@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f8f2">
+    <meta name="description" content="냉장고 사진 속 재료를 찾고, 가진 재료로 만들 수 있는 레시피를 추천받아 보세요.">
+    <title>냉털 — 냉장고 재료 레시피 추천</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <!-- 브랜드 헤더와 단계별 재료 인식 화면을 표시합니다. -->
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="냉털 홈">
+        <span class="brand-mark" aria-hidden="true">냉</span>
+        <span>냉털</span>
+      </a>
+      <span class="header-note">오늘은 뭘 해 먹지?</span>
+      <button id="account-button" class="button button-account" type="button">로그인</button>
+    </header>
+
+    <!-- 인증·프로필·저장 레시피를 앱 안에서 관리합니다. -->
+    <dialog id="account-dialog" class="account-dialog" aria-labelledby="account-dialog-title">
+      <div class="account-dialog-header">
+        <div>
+          <p class="eyebrow">나의 냉털</p>
+          <h2 id="account-dialog-title">내 계정</h2>
+        </div>
+        <button id="close-account-dialog" class="dialog-close" type="button" aria-label="계정 창 닫기">×</button>
+      </div>
+
+      <p id="account-message" class="account-message" role="status" aria-live="polite"></p>
+
+      <section id="login-panel" class="account-panel">
+        <h3>로그인</h3>
+        <form id="login-form" class="account-form">
+          <label for="login-email">이메일</label>
+          <input id="login-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+          <label for="login-password">비밀번호</label>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required>
+          <button class="button button-primary account-submit" type="submit">로그인</button>
+        </form>
+        <div class="account-links">
+          <button id="show-signup" class="text-button" type="button">새 계정 만들기</button>
+          <button id="show-recovery" class="text-button" type="button">비밀번호를 잊으셨나요?</button>
+        </div>
+      </section>
+
+      <section id="signup-panel" class="account-panel" hidden>
+        <h3>계정 만들기</h3>
+        <form id="signup-form" class="account-form">
+          <label for="signup-name">표시 이름</label>
+          <input id="signup-name" name="displayName" type="text" autocomplete="nickname" maxlength="60" required>
+          <label for="signup-email">이메일</label>
+          <input id="signup-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+          <label for="signup-password">비밀번호 <span>8자 이상</span></label>
+          <input id="signup-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+          <button class="button button-primary account-submit" type="submit">가입하고 시작하기</button>
+        </form>
+        <button id="show-login-from-signup" class="text-button" type="button">로그인으로 돌아가기</button>
+      </section>
+
+      <section id="recovery-panel" class="account-panel" hidden>
+        <h3>비밀번호 재설정</h3>
+        <p class="account-help">가입한 이메일로 재설정 링크를 보내 드려요.</p>
+        <form id="recovery-form" class="account-form">
+          <label for="recovery-email">이메일</label>
+          <input id="recovery-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+          <button class="button button-primary account-submit" type="submit">재설정 이메일 보내기</button>
+        </form>
+        <button id="show-login-from-recovery" class="text-button" type="button">로그인으로 돌아가기</button>
+      </section>
+
+      <section id="new-password-panel" class="account-panel" hidden>
+        <h3>새 비밀번호 설정</h3>
+        <form id="new-password-form" class="account-form">
+          <label for="new-password">새 비밀번호 <span>8자 이상</span></label>
+          <input id="new-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+          <button class="button button-primary account-submit" type="submit">비밀번호 변경</button>
+        </form>
+      </section>
+
+      <section id="profile-panel" class="account-panel" hidden>
+        <div class="profile-summary">
+          <div class="profile-avatar" aria-hidden="true">냉</div>
+          <div>
+            <h3 id="profile-email"></h3>
+            <p>나만의 요리 프로필</p>
+          </div>
+        </div>
+
+        <form id="profile-form" class="account-form">
+          <label for="profile-name">표시 이름</label>
+          <input id="profile-name" name="displayName" type="text" autocomplete="nickname" maxlength="60" required>
+          <label for="profile-diet">식단 선호 <span>선택</span></label>
+          <input id="profile-diet" name="dietPreference" type="text" maxlength="80" placeholder="예: 채식, 저탄수화물">
+          <label for="profile-servings">기본 인분</label>
+          <select id="profile-servings" name="defaultServings">
+            <option value="1">1인분</option>
+            <option value="2">2인분</option>
+            <option value="3">3인분</option>
+            <option value="4">4인분</option>
+            <option value="6">6인분</option>
+            <option value="8">8인분</option>
+            <option value="12">12인분</option>
+          </select>
+          <button class="button button-primary account-submit" type="submit">프로필 저장</button>
+        </form>
+
+        <section class="saved-section" aria-labelledby="saved-title">
+          <div class="saved-heading">
+            <h3 id="saved-title">저장한 레시피</h3>
+            <span id="saved-count" class="saved-count">0개</span>
+          </div>
+          <p id="saved-empty" class="account-help">아직 저장한 레시피가 없어요. 마음에 드는 레시피를 저장해 보세요.</p>
+          <ul id="saved-recipe-list" class="saved-recipe-list"></ul>
+        </section>
+
+        <details class="delete-account-details">
+          <summary>계정 및 데이터 삭제</summary>
+          <p>계정을 삭제하면 프로필과 저장 레시피가 함께 영구 삭제됩니다. 되돌릴 수 없어요.</p>
+          <label for="delete-account-password">현재 비밀번호</label>
+          <input id="delete-account-password" type="password" autocomplete="current-password" minlength="8" maxlength="128">
+          <button id="delete-account-button" class="button button-danger" type="button">계정과 데이터 삭제</button>
+        </details>
+
+        <button id="logout-button" class="button button-secondary logout-button" type="button">로그아웃</button>
+      </section>
+    </dialog>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow"><span aria-hidden="true">✳</span> 냉장고 재료 찾기</p>
+        <h1 id="page-title">냉장고 속 재료,<br><span>한눈에 확인해요.</span></h1>
+        <p class="intro-copy">사진을 올리면 식재료를 찾아 목록으로 정리해 드려요.<br class="desktop-break"> 인식 결과는 직접 확인하고 수정할 수 있어요.</p>
+      </section>
+
+      <section class="workspace" aria-label="냉장고 사진 재료 인식">
+        <div class="upload-card">
+          <div class="section-heading">
+            <span class="step-number">01</span>
+            <div>
+              <h2>냉장고 사진 올리기</h2>
+              <p>재료가 잘 보이도록 밝은 사진을 선택해 주세요.</p>
+            </div>
+          </div>
+
+          <div class="drop-area" id="drop-area">
+            <input id="camera-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp" aria-hidden="true" tabindex="-1">
+            <input id="file-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp" aria-hidden="true" tabindex="-1">
+            <div id="upload-empty" class="upload-empty">
+              <div class="upload-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none">
+                  <rect x="7" y="12" width="34" height="27" rx="5" stroke="currentColor" stroke-width="2"></rect>
+                  <path d="M17 12l2.5-4h9L31 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                  <circle cx="24" cy="25" r="7" stroke="currentColor" stroke-width="2"></circle>
+                  <path d="M24 21v8m-4-4h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                </svg>
+              </div>
+              <p class="drop-title">사진을 끌어다 놓거나 선택해 주세요</p>
+              <p class="drop-subtitle">JPG, PNG, WebP · 최대 3MB</p>
+              <div class="upload-actions">
+                <button class="button button-secondary" id="camera-button" type="button">사진 촬영</button>
+                <button class="button button-secondary" id="choose-button" type="button">파일 선택</button>
+              </div>
+            </div>
+
+            <div id="preview-wrap" class="preview-wrap" hidden>
+              <img id="image-preview" class="image-preview" alt="선택한 냉장고 사진 미리보기">
+              <div class="preview-toolbar">
+                <span id="file-name" class="file-name"></span>
+                <button id="remove-image" class="text-button" type="button">사진 바꾸기</button>
+              </div>
+            </div>
+          </div>
+
+          <p class="privacy-note"><span aria-hidden="true">↗</span> 사진은 분석에만 사용하며 서버에 저장하지 않아요.</p>
+          <button class="button button-primary analyze-button" id="analyze-button" type="button" disabled>
+            <span id="analyze-label">재료 찾아보기</span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <p id="upload-message" class="inline-message" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="result-card" id="result-card" aria-labelledby="result-title" hidden>
+          <div class="section-heading">
+            <span class="step-number step-number-green">02</span>
+            <div>
+              <h2 id="result-title">재료 확인하기</h2>
+              <p>잘못 찾은 재료는 고치고, 빠진 재료는 추가해 주세요.</p>
+            </div>
+          </div>
+
+          <div id="result-message" class="result-message" role="status" aria-live="polite"></div>
+          <ul id="ingredient-list" class="ingredient-list" aria-label="인식한 재료 목록"></ul>
+
+          <form id="add-ingredient-form" class="add-form">
+            <label class="visually-hidden" for="new-ingredient">추가할 재료</label>
+            <input id="new-ingredient" name="ingredient" type="text" maxlength="80" placeholder="재료를 직접 입력해 주세요">
+            <button class="button button-add" type="submit">추가</button>
+          </form>
+
+          <div class="result-footer">
+            <span id="ingredient-count" class="ingredient-count">재료 0개</span>
+            <button id="confirm-button" class="button button-primary confirm-button" type="button" disabled>
+              재료 목록 확정 <span aria-hidden="true">→</span>
+            </button>
+          </div>
+          <p id="confirm-message" class="inline-message" role="status" aria-live="polite"></p>
+        </div>
+
+        <!-- 확정 재료와 선택 조건을 이용해 레시피를 만들고 결과를 확인합니다. -->
+        <section class="recipe-card" id="recipe-card" aria-labelledby="recipe-title" hidden>
+          <div class="section-heading">
+            <span class="step-number">03</span>
+            <div>
+              <h2 id="recipe-title">재료로 레시피 만들기</h2>
+              <p>확정한 재료를 활용해 어울리는 요리를 추천해 드려요.</p>
+            </div>
+          </div>
+
+          <div class="recipe-ingredient-summary">
+            <div class="summary-heading">
+              <span>사용할 재료</span>
+              <button id="edit-ingredients-button" class="text-button" type="button">재료 수정</button>
+            </div>
+            <div id="recipe-ingredient-chips" class="ingredient-chips" aria-label="레시피 생성에 사용할 재료"></div>
+          </div>
+
+          <form id="recipe-form" class="recipe-form">
+            <div class="recipe-options">
+              <div class="form-field">
+                <label for="servings">인분</label>
+                <select id="servings" name="servings">
+                  <option value="1">1인분</option>
+                  <option value="2" selected>2인분</option>
+                  <option value="3">3인분</option>
+                  <option value="4">4인분</option>
+                  <option value="6">6인분</option>
+                  <option value="8">8인분</option>
+                  <option value="12">12인분</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="max-cooking-time">조리 시간</label>
+                <select id="max-cooking-time" name="maxCookingTime">
+                  <option value="">시간 제한 없음</option>
+                  <option value="15">15분 이내</option>
+                  <option value="30">30분 이내</option>
+                  <option value="45">45분 이내</option>
+                  <option value="60">60분 이내</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="diet-preference">식단 선호 <span>선택</span></label>
+              <input id="diet-preference" name="diet" type="text" maxlength="80" placeholder="예: 채식, 저탄수화물">
+            </div>
+            <div class="form-field">
+              <label for="allergy-notes">알레르기·피해야 할 재료 <span>선택</span></label>
+              <input id="allergy-notes" name="allergies" type="text" maxlength="200" placeholder="예: 땅콩, 새우">
+            </div>
+            <p class="allergy-warning" id="recipe-disclaimer">
+              알레르기 정보는 레시피 요청에만 사용하고 저장하지 않아요. AI가 안전을 보장하지 않으므로 조리 전 재료 표시와 교차 오염 여부를 직접 확인해 주세요.
+            </p>
+            <button id="generate-recipes-button" class="button button-primary analyze-button" type="submit">
+              <span id="generate-recipes-label">레시피 추천받기</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </form>
+
+          <p id="recipe-message" class="inline-message" role="status" aria-live="polite"></p>
+          <div id="recipe-results" class="recipe-results" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <footer class="page-footer">
+        <span class="footer-sparkle" aria-hidden="true">✳</span>
+        <p>인식 결과는 참고용이에요. 목록을 확인하고 필요한 내용을 수정해 주세요.</p>
+      </footer>
+    </main>
+  </body>
+</html>

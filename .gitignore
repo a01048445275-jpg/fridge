@@ -1,0 +1,4 @@
+# 로컬 비밀정보와 설치 산출물은 버전 관리에 포함하지 않습니다.
+.env.local
+node_modules/
+.vercel/
